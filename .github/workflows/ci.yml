@@ -1,0 +1,36 @@
+name: Orinonu CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Backend, Interface and Installer
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      ORINONU_UPDATE_CHECK: "0"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "26.9.0"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+      - run: npm run check:runtime
+      - run: npm --prefix frontend ci
+      - run: npm test
+      - run: npm run check:ui
+      - run: npm run test:ui
+      - run: npm run build:ui
+      - run: npm --prefix frontend exec -- playwright install chromium
+      - run: npm run test:ui:browser
+      - run: python tests/configure_test.py

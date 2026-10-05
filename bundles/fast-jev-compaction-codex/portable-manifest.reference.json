@@ -1,0 +1,18 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "fast-jev-compaction-codex",
+  "version": "0.1.0",
+  "description": "Jev-selected tool evidence preserved around native Codex compaction on Windows.",
+  "license": "MIT",
+  "extensions": {
+    "com.openai": {
+      "hooks": "./hooks/hooks.json",
+      "interface": {
+        "displayName": "Jev Context Preservation",
+        "shortDescription": "Preserve Jev-selected evidence after native compaction",
+        "longDescription": "Windows adaptation of fast-jev-compaction. Selects tool evidence before native compaction and adds bounded quoted evidence afterwards. Requires TYPESAFE_API_KEY and Codex hook trust.",
+        "category": "Developer Tools"
+      }
+    }
+  }
+}

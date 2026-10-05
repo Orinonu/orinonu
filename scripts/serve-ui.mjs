@@ -1,0 +1,11 @@
+import {resolve,dirname,join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {existsSync} from 'node:fs';
+import {createUiGateway} from '../src/ui-gateway.mjs';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+if(!existsSync(join(root,'public','ui','index.html')))throw new Error('Execute npm run build:ui antes de iniciar a interface.');
+const port=Number(process.env.NEXO_UI_PORT??18794);
+if(!Number.isSafeInteger(port)||port<1||port>65535)throw new Error('Porta da interface inválida.');
+const server=createUiGateway({publicDir:join(root,'public'),upstream:process.env.NEXO_API_ORIGIN??'http://127.0.0.1:18792'});
+server.listen(port,'127.0.0.1',()=>process.stdout.write(`Orinonu · Agentic OS: http://127.0.0.1:${port}/\n`));
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>server.close(()=>process.exit(0)));

@@ -1,0 +1,25 @@
+{
+  "name": "orinonu-agents",
+  "version": "0.0.5",
+  "private": true,
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@openai/agents": "0.18.0",
+    "zod": "4.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.0.10",
+    "esbuild": "0.28.2",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}

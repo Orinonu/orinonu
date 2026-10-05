@@ -1,0 +1,11 @@
+{
+  "model": "jev-1.13.0",
+  "keepThreshold": 0.5,
+  "preserveRecentMessages": 6,
+  "maxStateTokens": 25000,
+  "maxRequestTokens": 30000,
+  "truncateHeadChars": 300,
+  "maxContextChars": 6000,
+  "maxEntryChars": 1200,
+  "snapshotRetention": 3
+}

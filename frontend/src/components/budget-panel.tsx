@@ -1,0 +1,19 @@
+"use client";
+import {formBudgetPolicy} from "../lib/budget";
+import {useEffect,useState,type FormEvent} from "react";
+type Summary={revision:number;policy:{enabled:boolean};observed:Record<string,number|null>;reserved:Record<string,number>;warning:string};
+export function BudgetPanel({workspace,taskId}:{workspace:string;taskId?:string}){
+ const [project,setProject]=useState(false),[summary,setSummary]=useState<Summary|null>(null),[message,setMessage]=useState("");
+ const scope={workspace,...(!project&&taskId?{task_id:taskId}:{})};
+ async function load(){const r=await fetch('/api/budgets?'+new URLSearchParams(Object.fromEntries(Object.entries(scope).filter((entry):entry is [string,string]=>typeof entry[1]==='string'))));if(!r.ok)throw Error('Falha ao consultar orcamento');setSummary(await r.json());}
+ useEffect(()=>{load().catch(e=>setMessage(String(e.message)));},[workspace,taskId,project]);
+ async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();const data=new FormData(e.currentTarget),enabled=data.get('enabled')==='on',metric=String(data.get('metric')),limit=Number(data.get('limit')),envelope=Number(data.get('envelope'));
+ if(enabled&&(!String(data.get('limit')).trim()||!String(data.get('envelope')).trim()||![limit,envelope].every(n=>Number.isSafeInteger(n)&&n>=0))){setMessage('Informe teto e reserva inteiros nao negativos.');return;}
+ let policy;try{policy=formBudgetPolicy({enabled,metric,limit:String(data.get('limit')??''),envelope:String(data.get('envelope')??''),unknown:String(data.get('unknown')??'')});}catch(e){setMessage(e instanceof Error?e.message:String(e));return;}
+ try{const r=await fetch('/api/budgets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...scope,policy,expected_revision:summary?.revision??0,request_id:crypto.randomUUID()})});const body=await r.json();if(!r.ok)throw Error(body.error??'Configura??o rejeitada');await load();setMessage('Politica salva. Reservas existentes continuam contabilizadas.');}catch(e){setMessage(e instanceof Error?e.message:String(e));}}
+ return <section><h3>Orcamento expl?cito</h3>{taskId&&<label><input type="checkbox" checked={project} onChange={e=>{setSummary(null);setProject(e.target.checked);}}/> Aplicar ao projeto inteiro</label>}
+ <p>{summary?.policy.enabled?'Ativo':'Desativado'} ? cada politica de miss?o e projeto ? aplicada conjuntamente.</p>
+ <dl>{[['input_tokens','Tokens de entrada'],['output_tokens','Tokens de saida'],['total_tokens','Tokens totais'],['billed_usd_micro','Faturado comprovado (milionesimos de USD)'],['estimated_usd_micro','Estimado (milionesimos de USD)']].map(([key,label])=><div key={key}><dt>{label}</dt><dd>{summary?.observed[key]??'Desconhecido'} ? reserva {summary?.reserved[key]??'Desconhecida'}</dd></div>)}<dt>Franquia</dt><dd>Desconhecida; contabilizada separadamente</dd></dl>
+ <form onSubmit={submit}><label><input name="enabled" type="checkbox"/> Habilitar esta politica</label><label>Metrica <select name="metric"><option value="total_tokens">Tokens totais</option><option value="billed_usd_micro">Faturado (milionesimos de USD)</option><option value="estimated_usd_micro">Estimado (milionesimos de USD)</option></select></label><label>Teto <input name="limit" type="number" min="0" step="1"/></label><label>Reserva por operacao em todas as fases <input name="envelope" type="number" min="0" step="1"/></label><label>Uso desconhecido <select name="unknown" required defaultValue=""><option value="" disabled>Escolha explicitamente</option><option value="block">Bloquear novos despachos</option><option value="retain_reservation">Manter reserva</option></select></label><button disabled={!summary}>Salvar politica</button></form>
+ <p>{summary?.warning??'Chamadas em andamento podem ultrapassar os tetos. Cobertura parcial das opera??es supervisionadas.'}</p><p role="status">{message}</p></section>;
+}

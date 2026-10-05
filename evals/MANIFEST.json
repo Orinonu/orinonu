@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "frozen_at": "2026-10-04T00:00:00.000Z",
+  "files": {
+    "fixtures.json": "add95a12dfa43aeeba0dead9d8a050e5172f600cacbfc2c81a797c570ac5867b"
+  },
+  "immutable_policy": "Conjuntos de avaliação e benchmarks de aceitação são independentes dos candidatos. Candidatos ou agentes não podem alterar este manifesto ou seus arquivos. Qualquer divergência de hash invalida a época de auto-evolução."
+}

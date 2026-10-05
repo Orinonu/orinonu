@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "^(manual|auto)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/scripts/run-hook.ps1\" -Mode Prepare",
+            "timeout": 30,
+            "statusMessage": "Selecting context with Jev"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "^compact$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${PLUGIN_ROOT}/scripts/run-hook.ps1\" -Mode Inject",
+            "timeout": 5,
+            "additionalContextLimit": 2500,
+            "statusMessage": "Restoring Jev-selected evidence"
+          }
+        ]
+      }
+    ]
+  }
+}
